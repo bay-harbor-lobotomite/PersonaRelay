@@ -51,7 +51,10 @@ class Message(BaseModel):
     id: int = Field(default_factory=lambda: uuid.uuid4().int)
     text: str
     sender: Sender
-
+    
+class ChatRequest(BaseModel):
+    last_user_message: Message
+    persona_name: str
 class ChatHistory(BaseModel):
     messages: List[Message]
     
@@ -60,29 +63,69 @@ class ChatHistory(BaseModel):
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 class PersonaBase(BaseModel):
-    """Base model with common fields."""
+    """The base model containing all fields a user can define for a persona."""
     name: str = Field(..., min_length=1, max_length=100)
+    age: int = Field(..., gt=0, description="The persona's age in years.")
+    role: str = Field(..., max_length=200)
+    style: str = Field(..., max_length=200)
+    domain_knowledge: List[str] = Field(default_factory=list)
+    quirks: str = Field(default="", max_length=500)
+    bio: str = Field(default="", max_length=2000)
+    lore: str = Field(default="", max_length=2000)
+    personality: str = Field(default="", max_length=500)
+    conversation_style: str = Field(default="", max_length=500)
+    description: str = Field(default="", max_length=1000)
+
+    # Personality traits with validation to keep them between 0.0 and 1.0
+    emotional_stability: float = Field(..., ge=0.0, le=1.0)
+    friendliness: float = Field(..., ge=0.0, le=1.0)
+    creativity: float = Field(..., ge=0.0, le=1.0)
+    curiosity: float = Field(..., ge=0.0, le=1.0)
+    formality: float = Field(..., ge=0.0, le=1.0)
+    empathy: float = Field(..., ge=0.0, le=1.0)
+    humor: float = Field(..., ge=0.0, le=1.0)
+
 
 class PersonaCreate(PersonaBase):
-    """Model for creating a new persona. User only provides the name."""
+    """Model used for creating a persona. Inherits all fields from base."""
     pass
 
-class PersonaUpdate(BaseModel):
-    """Model for updating a persona. All fields are optional for PATCH-like behavior."""
-    name: str | None = Field(default=None, min_length=1, max_length=100)
 
 class Persona(PersonaBase):
-    """Model for representing a persona in the database and API responses."""
-    # Use PyObjectId to handle the conversion from MongoDB's _id
-    id: PyObjectId = Field(alias="_id", default=None)
+    """The full persona model, including database-generated fields, for API responses."""
+    id: PyObjectId = Field(alias="_id")
     creator_id: str
 
     class Config:
-        # This allows Pydantic to populate the model from an object (like a dict from MongoDB)
-        # even if it's not a dictionary, and to use the 'alias' (_id) correctly.
         from_attributes = True
         populate_by_name = True
-        json_encoders = {ObjectId: str} # Fallback for older Pydantic versions
+        json_encoders = {ObjectId: str}
+
+
+class PersonaUpdate(BaseModel):
+    """
+    An update model where every single field is optional.
+    This allows for flexible PATCH-style updates.
+    """
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    age: int | None = Field(default=None, gt=0)
+    role: str | None = Field(default=None, max_length=200)
+    style: str | None = Field(default=None, max_length=200)
+    domain_knowledge: List[str] | None = None
+    quirks: str | None = Field(default=None, max_length=500)
+    bio: str | None = Field(default=None, max_length=2000)
+    lore: str | None = Field(default=None, max_length=2000)
+    personality: str | None = Field(default=None, max_length=500)
+    conversation_style: str | None = Field(default=None, max_length=500)
+    description: str | None = Field(default=None, max_length=1000)
+
+    emotional_stability: float | None = Field(default=None, ge=0.0, le=1.0)
+    friendliness: float | None = Field(default=None, ge=0.0, le=1.0)
+    creativity: float | None = Field(default=None, ge=0.0, le=1.0)
+    curiosity: float | None = Field(default=None, ge=0.0, le=1.0)
+    formality: float | None = Field(default=None, ge=0.0, le=1.0)
+    empathy: float | None = Field(default=None, ge=0.0, le=1.0)
+    humor: float | None = Field(default=None, ge=0.0, le=1.0)
 
 # --- FastAPI App ---
 app = FastAPI(lifespan=lifespan)
@@ -171,31 +214,6 @@ async def read_users_me(
     Returns the data for the currently authenticated user.
     """
     return current_user
-
-@app.post("/api/chat", response_model=Message)
-async def chat(
-    history: ChatHistory,
-    current_user: Annotated[User, Depends(get_current_user_dependency)] # This line protects the endpoint
-) -> Message:
-    """
-    Receives the entire chat history and returns a new bot message.
-    Requires user to be authenticated.
-    """
-    print(f"Chat request from user: {current_user.username}") # You can now see who is chatting
-    
-    last_user_message = "No message found."
-    if history.messages and history.messages[-1].sender == 'user':
-        last_user_message = history.messages[-1].text
-
-    text_response = await get_agent_response(last_user_message)
-
-    bot_response = Message(
-        text=text_response,
-        sender='bot'
-    )
-    
-    return bot_response
-
 
 
 @app.post("/api/personas", response_model=Persona, status_code=status.HTTP_201_CREATED)
@@ -308,3 +326,32 @@ async def delete_persona(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Persona not found or you don't have permission to delete it.")
 
     return None
+
+
+@app.post("/api/chat", response_model=Message)
+async def chat(
+    request: ChatRequest,  # Use the new model here
+    current_user: Annotated[User, Depends(get_current_user_dependency)],
+    db: Annotated[Database, Depends(get_database)], # This line protects the endpoint
+) -> Message:
+    """
+    Receives a prompt
+    Requires user to be authenticated.
+    """
+    print(f"Chat request from user: {current_user.username}") # You can now see who is chatting
+    
+    # get the current persona
+    persona_name = request.persona_name
+    last_user_message = request.last_user_message
+    persona = db.personas.find_one({
+            "name": persona_name,
+            "creator_id": current_user.username
+    })
+
+    text_response = await get_agent_response(last_user_message, persona)
+    bot_response = Message(
+        text=text_response,
+        sender='bot'
+    )
+    
+    return bot_response

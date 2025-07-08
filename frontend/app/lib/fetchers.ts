@@ -1,5 +1,5 @@
 'use client';
-import useSWR, {mutate} from "swr";
+import useSWR, { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
 import { PERSONAS_BASE_URL } from "./constants";
 
@@ -10,7 +10,10 @@ export const authedFetcher = (url: string) => {
         headers: {
             Authorization: `Bearer ${token}`,
         },
-    }).then(res => res.json());
+    }).then(res => res.json()).catch(err => {
+        console.error("Error fetching data:", err)
+        return err
+    });
 };
 
 export const usePersonas = () => {
