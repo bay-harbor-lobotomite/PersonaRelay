@@ -6,7 +6,7 @@ import PersonalityList from './PersonalityList'
 import LogoutButton from './LogoutButton'
 import {PersonaConfig} from "./AddPersonalityForm"
 interface SidebarProps {
-  setSelectedPersona: Dispatch<SetStateAction<string>>
+  setSelectedPersona: any
 }
 const Sidebar: React.FC<SidebarProps> = ({ setSelectedPersona }) => {
   const { personas, isLoading, isError, addPersona } = usePersonas()

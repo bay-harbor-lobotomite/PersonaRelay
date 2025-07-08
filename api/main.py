@@ -37,6 +37,10 @@ async def shutdown_db_client(app: FastAPI):
     app.mongodb_client.close()
     print("Database disconnected.")
 
+# This is a Pydantic v2 helper to validate MongoDB's ObjectId
+# It converts the ObjectId to a string for JSON serialization
+PyObjectId = Annotated[str, BeforeValidator(str)]
+
 class User(BaseModel):
     username: str
 
@@ -49,10 +53,22 @@ class UserCreate(BaseModel):
 
 Sender = Literal['user', 'bot']
 
-class Message(BaseModel):
-    id: int = Field(default_factory=lambda: uuid.uuid4().int)
+class MessageBase(BaseModel):
     text: str
+    username: str
     sender: Sender
+    persona_name: str
+    
+class Message(MessageBase):
+    """
+    Represents a chat message.
+    """
+    id: PyObjectId = Field(alias="_id")
+
+    class Config:
+        from_attributes = True
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
     
 class ChatRequest(BaseModel):
     last_user_message: Message
@@ -60,9 +76,6 @@ class ChatRequest(BaseModel):
 class ChatHistory(BaseModel):
     messages: List[Message]
     
-# This is a Pydantic v2 helper to validate MongoDB's ObjectId
-# It converts the ObjectId to a string for JSON serialization
-PyObjectId = Annotated[str, BeforeValidator(str)]
 
 class NostrPost(BaseModel):
     content: str
@@ -356,13 +369,34 @@ async def chat(
     })
 
     text_response = await content_agent_response(last_user_message, persona)
-    bot_response = Message(
+    #go through the text of the message and find any instances of </think>. Find the last instance of </think> and replace the word
+    #with the portion after this tag
+    if "</think>" in text_response:
+        last_think_idx = text_response.rfind("</think>")
+        text_response = text_response[last_think_idx + len("</think>") :]
+        text_response = text_response.lstrip()
+    bot_response = MessageBase(
         text=text_response,
-        sender='bot'
+        sender='bot',
+        username=current_user.username,
+        persona_name=persona_name
     )
-    
-    return bot_response
 
+    
+    result = db.messages.insert_one(bot_response.model_dump())
+    generated_message = db.messages.find_one({"_id": result.inserted_id})
+    
+    return generated_message
+
+@app.get("/api/messages", response_model=List[Message])
+async def list_messages(
+    persona_name: str,
+    current_user: Annotated[User, Depends(get_current_user_dependency)],
+    db: Annotated[Database, Depends(get_database)],
+):
+    messages = list(db.messages.find({"username": current_user.username, "persona_name": persona_name}))
+    return messages
+    
 @app.post("/api/personas/generate", response_model=PersonaCreate)
 async def generate_persona(
     persona_request: PersonaGenerateRequest,

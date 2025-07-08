@@ -17,7 +17,7 @@ export default function Login() {
     const token = localStorage.getItem("accessToken");
     if (token) {
       // If a token exists, redirect to the dashboard
-      router.push("/dashboard");
+      router.push("/generate");
     }
   }, [router]);             
 

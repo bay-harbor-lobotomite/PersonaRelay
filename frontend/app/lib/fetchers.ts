@@ -1,7 +1,7 @@
 'use client';
 import useSWR, { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
-import { PERSONAS_BASE_URL } from "./constants";
+import { MESSAGES_BASE_URL, PERSONAS_BASE_URL } from "./constants";
 
 const fetcher = (...args: [RequestInfo, RequestInit?]) => fetch(...args).then(res => res.json());
 export const authedFetcher = (url: string) => {
@@ -45,6 +45,18 @@ export const usePersonas = () => {
         addPersona,
     };
 }
+export const useMessages = (selectedPersona: string) => {
+    // add the selectedPersona as a query parameter to the URL
+    const MESSAGES_BASE_URL_WITH_PERSONA = `${MESSAGES_BASE_URL}?persona_name=${selectedPersona}`;
+
+    const { data, error, isLoading } = useSWR(MESSAGES_BASE_URL_WITH_PERSONA ,authedFetcher)
+
+    return {
+        messages: data,
+        isLoading,
+        isError: error,
+    };
+}
 
 export const usePersona = (id?: string) => {
     const shouldFetch = Boolean(id); // prevents fetch when id is undefined/null
@@ -60,6 +72,8 @@ export const usePersona = (id?: string) => {
         isError: error,
     };
 };
+
+    
 
 export async function addNewPersona(url: string, { arg }: { arg: string }) {
     await fetch(url, {
