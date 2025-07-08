@@ -16,7 +16,8 @@ from nostr_utils import post_to_nostr_util
 from dotenv import load_dotenv
 import os
 
-from agent import get_agent_response
+from agents.content_agent import get_agent_response as content_agent_response
+from agents.persona_agent import get_agent_response as persona_agent_response
 import auth
 
 load_dotenv()
@@ -65,6 +66,9 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 
 class NostrPost(BaseModel):
     content: str
+    
+class PersonaGenerateRequest(BaseModel):
+    sample_post: str
 
 class PersonaBase(BaseModel):
     """The base model containing all fields a user can define for a persona."""
@@ -78,7 +82,6 @@ class PersonaBase(BaseModel):
     lore: str = Field(default="", max_length=2000)
     personality: str = Field(default="", max_length=500)
     conversation_style: str = Field(default="", max_length=500)
-    description: str = Field(default="", max_length=1000)
 
     # Personality traits with validation to keep them between 0.0 and 1.0
     emotional_stability: float = Field(..., ge=0.0, le=1.0)
@@ -352,13 +355,29 @@ async def chat(
             "creator_id": current_user.username
     })
 
-    text_response = await get_agent_response(last_user_message, persona)
+    text_response = await content_agent_response(last_user_message, persona)
     bot_response = Message(
         text=text_response,
         sender='bot'
     )
     
     return bot_response
+
+@app.post("/api/personas/generate", response_model=PersonaCreate)
+async def generate_persona(
+    persona_request: PersonaGenerateRequest,
+    current_user: Annotated[User, Depends(get_current_user_dependency)]
+):
+    if not persona_request.sample_post:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Sample post is required.")
+
+    # Call the persona agent to generate the persona
+    persona_data = await persona_agent_response(persona_request.sample_post)
+
+    # Create a Persona object from the generated data, don't save to DB as the user needs to verify it first
+    persona_create = PersonaCreate(**persona_data, creator_id=current_user.username)
+        
+    return persona_create
 
 
 @app.post("/api/nostr/post", status_code=status.HTTP_200_OK)

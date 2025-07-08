@@ -81,3 +81,12 @@ export async function sendNostrPost(url: string, msg: string){
     const data = await response.json()
     return data
 }
+export async function sendSamplePost(url: string, sample_post: string){
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
+      body: JSON.stringify({ sample_post: sample_post }),
+    });
+    const data = await response.json()
+    return data
+}

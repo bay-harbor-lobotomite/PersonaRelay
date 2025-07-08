@@ -2,6 +2,8 @@
 import { FormEvent, useState } from 'react';
 import Modal from 'react-modal';
 import TraitSlider from './TraitSlider';
+import { sendSamplePost } from '@/app/lib/fetchers';
+import { API_BASE_URL } from '@/app/lib/constants';
 
 export interface PersonaConfig {
   name: string;
@@ -46,8 +48,8 @@ const initialPersonaData: PersonaConfig = {
 
 const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const [newItemText, setNewItemText] = useState('');
   const [persona, setPersona] = useState<PersonaConfig>(initialPersonaData);
+  const [samplePost, setSamplePost] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -65,6 +67,17 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
       [name]: isNumeric ? parseFloat(value) || 0 : value,
     }));
   };
+
+  const handleGeneratePersona = async () => {
+    // In a real app, you would call your API to generate the persona based on the sample post
+    // For now, we'll just log the sample post
+    console.log("Generating persona based on sample post:", samplePost);
+    const url = `${API_BASE_URL}/personas/generate`;
+    const response = await sendSamplePost(url, samplePost);
+    console.log("Generated Persona:", response);
+    // set state here
+    setPersona(response)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +107,11 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
     >
       <div className="flex flex-col align-items-center pb-4">
         <section>
+            <div className='mb-6'>  
+              <label htmlFor="style" className="block text-sm font-medium text-gray-700">Enter a sample post to automatically generate the persona </label>
+              <textarea id="style" name="style" value={samplePost} onChange={(e) => setSamplePost(e.target.value)} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+              <button onClick={handleGeneratePersona} className='mt-8 bg-blue-600 p-4 rounded-full text-white hover:cursor-pointer'>Generate Persona</button>
+            </div>
           <h2 className="text-xl font-semibold text-gray-800 border-b pb-3 mb-6">Core Identity</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

@@ -15,13 +15,6 @@ load_dotenv()
 IO_API_KEY = os.getenv("IO_API_KEY")
 BASE_ENDPOINT = os.getenv("BASE_ENDPOINT")
 
-@register_tool
-def search_duckduckgo(query: str, num_results: int = 5):
-    """Search DuckDuckGo and return the top results."""
-    with DDGS() as ddgs:
-        results = ddgs.text(query, max_results=num_results)
-        return ", ".join([result['body'] for result in results]   )
-
 # the content agent will create a catchy social media post based on the prompt of the user 
 CONTENT_AGENT_INSTRUCTIONS = (
     "You are an assistant specialized in creating catchy social media posts. "
@@ -41,13 +34,6 @@ def parse_thoughts_and_content(text):
     return thoughts, [non_thoughts] if non_thoughts else []
 
 async def get_agent_response(text: str, persona: any):
-    summary_agent = Agent(
-        name="Summarize Agent",
-        instructions="You are an assistant specialized in summarization.",
-        model="mistralai/Ministral-8B-Instruct-2410",
-        api_key=IO_API_KEY,
-        base_url=BASE_ENDPOINT
-    )
     # persona config has name age role, style, domain_knowledge, quirks bio lore personality, conversation_style, description, emotional_stability
     #friendliness, curiosity, creativtity ,humor, formality, empathy
     persona_config = PersonaConfig(
