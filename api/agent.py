@@ -26,7 +26,7 @@ def search_duckduckgo(query: str, num_results: int = 5):
 CONTENT_AGENT_INSTRUCTIONS = (
     "You are an assistant specialized in creating catchy social media posts. "
     "Your task is to generate a post that is engaging and relevant to the topic provided. "
-    "Make sure to include hashtags and emojis where appropriate."
+    "Include hashtags at the end of the post"
     "Create a crisp and short post, don't add multiple punchlines"
     "You may use the search function to find relevant information online."
     "Don't think too much and don't return your thoughts, just return the content of the post."

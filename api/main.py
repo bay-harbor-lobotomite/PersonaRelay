@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, BeforeValidator
 from pymongo import MongoClient
 from pymongo.database import Database
 from contextlib import asynccontextmanager
+from nostr_utils import post_to_nostr_util
 from dotenv import load_dotenv
 import os
 
@@ -61,6 +62,9 @@ class ChatHistory(BaseModel):
 # This is a Pydantic v2 helper to validate MongoDB's ObjectId
 # It converts the ObjectId to a string for JSON serialization
 PyObjectId = Annotated[str, BeforeValidator(str)]
+
+class NostrPost(BaseModel):
+    content: str
 
 class PersonaBase(BaseModel):
     """The base model containing all fields a user can define for a persona."""
@@ -355,3 +359,17 @@ async def chat(
     )
     
     return bot_response
+
+
+@app.post("/api/nostr/post", status_code=status.HTTP_200_OK)
+async def post_to_nostr(
+    post: NostrPost,
+    current_user: Annotated[User, Depends(get_current_user_dependency)],
+):
+
+    # Here you would implement the logic to post to Nostr
+    # For now, we'll just simulate a successful post
+    response = await post_to_nostr_util(post.content)
+    print(response)
+    
+    return {"status": "success", "message": "Posted to Nostr successfully!"}

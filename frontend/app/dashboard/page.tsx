@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { usePersona } from "../lib/fetchers";
+import { sendNostrPost, usePersona } from "../lib/fetchers";
 import ChatInput from "@/app/ui/components/ChatInput";
 import ChatMessage from "@/app/ui/components/ChatMessage";
 import Sidebar from "@/app/ui/components/Sidebar";
 import { Message } from "@/app/ui/components/ChatMessage";
-import { CHAT_BASE_URL } from "@/app/lib/constants";
+import { API_BASE_URL, CHAT_BASE_URL } from "@/app/lib/constants";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { checkLogin } from "../lib/checkLogin";
-
+import {toast, ToastContainer } from "react-toastify";
 const MessageSchema = z.object({
   id: z.number(),
   text: z.string(),
@@ -41,6 +41,15 @@ export default function Home() {
 
   const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); };
   useEffect(() => { scrollToBottom(); }, [messages]);
+
+  const handlePostNostr = async (msg: string) => {
+    const url = `${API_BASE_URL}/nostr/post`;
+    console.log(url)
+    const data = await sendNostrPost(url, msg);
+    console.log("Posted to Nostr successfully:", data);
+    // Optionally, you can update the UI or show a success message
+    toast.success("Posted to Nostr successfully!")    
+  }
 
   // UPDATED: This function now calls the FastAPI backend
   const handleSendMessage = async (text: string) => {
@@ -87,6 +96,7 @@ export default function Home() {
 
   return (
     <div className="flex">
+      <ToastContainer position="bottom-right"/>
       <Sidebar setSelectedPersona={setSelectedPersona} />
       <div className="flex flex-grow flex-col max-w-screen h-screen bg-gray-50 dark:bg-gray-950 font-[family-name:var(--font-geist-sans)]">
         <header className="p-4 border-b border-gray-200 dark:border-gray-800 text-center">
@@ -94,7 +104,7 @@ export default function Home() {
         </header>
         <div className="flex-grow p-4 sm:p-6 overflow-y-auto">
           <div className="space-y-6">
-            {messages.map(message => (<ChatMessage key={message.id} message={message} />))}
+            {messages.map(message => (<ChatMessage key={message.id} message={message} onPost={handlePostNostr}/>))}
             <div ref={messagesEndRef} />
           </div>
         </div>

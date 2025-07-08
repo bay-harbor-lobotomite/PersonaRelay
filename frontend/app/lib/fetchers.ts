@@ -69,3 +69,15 @@ export async function addNewPersona(url: string, { arg }: { arg: string }) {
         }
     })
 }
+
+export async function sendNostrPost(url: string, msg: string){
+    console.log(msg)
+    console.log(typeof msg)
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
+      body: JSON.stringify({ content: msg }),
+    });
+    const data = await response.json()
+    return data
+}
