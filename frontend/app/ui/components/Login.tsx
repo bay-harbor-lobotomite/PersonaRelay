@@ -4,22 +4,20 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/app/lib/constants";
+import { checkLogin } from "@/app/lib/checkLogin";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [currentUser, setCurrentUser] = useState<any>();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     // Check if the user is already logged in
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      // If a token exists, redirect to the dashboard
-      router.push("/generate");
-    }
-  }, [router]);             
+    checkLogin(router, setCurrentUser);
+  }, []);             
 
   const handleLogin = async () => {
     // The /token endpoint expects form data, not JSON

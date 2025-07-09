@@ -103,7 +103,15 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
       isOpen={isAdding}
       onRequestClose={() => setIsAdding(false)}
       contentLabel="Add New Item"
-      ariaHideApp={true}
+      ariaHideApp={false}
+        style={{
+          content: {
+            zIndex: 1001
+          },
+          overlay: {
+            zIndex: 1000
+          },
+        }}
     >
       <div className="flex flex-col align-items-center pb-4">
         <section>

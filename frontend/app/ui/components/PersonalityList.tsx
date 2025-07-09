@@ -1,7 +1,6 @@
 import React from 'react'
 
 const PersonalityList = ({personalityList, onSelectPersona}: {personalityList: any[], onSelectPersona: any}) => {
-  console.log(personalityList)
   return (
     <div className="mt-2">
         <ul className="list-none p-0">

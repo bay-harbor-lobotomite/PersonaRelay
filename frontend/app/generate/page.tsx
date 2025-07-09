@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { checkLogin } from "@/app/lib/checkLogin";
 import {toast, ToastContainer } from "react-toastify";
 import { set } from "zod/v4";
-const MessageSchema = z.object({
+export const MessageSchema = z.object({
   _id: z.string(),
   text: z.string(),
   sender: z.literal('bot'),
