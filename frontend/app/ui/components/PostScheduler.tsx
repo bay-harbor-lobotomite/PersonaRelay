@@ -14,6 +14,7 @@ import { Overlay } from 'react-overlays';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import MessageCard, { Message } from './MessageCard'; // Assuming Message type is now correct
+import { reverse } from 'dns';
 
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
@@ -35,7 +36,6 @@ interface PostSchedulerProps {
 }
 
 const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
-    // --- NEW STATE MANAGEMENT ---
     const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
     const [unscheduled, setUnscheduled] = useState<Message[]>([]);
     // ----------------------------
@@ -58,7 +58,6 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
         };
     };
 
-    // --- 1. INITIALIZATION: Populate state from props on load ---
     useEffect(() => {
         const initialEvents: CalendarEvent[] = [];
         const initialUnscheduled: Message[] = [];
@@ -75,6 +74,7 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
                 if (event) initialEvents.push(event);
             }
         });
+        initialUnscheduled.reverse()
 
         setCalendarEvents(initialEvents);
         setUnscheduled(initialUnscheduled);

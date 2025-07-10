@@ -412,10 +412,6 @@ async def chat(
     current_user: Annotated[User, Depends(get_current_user_dependency)],
     db: Annotated[Database, Depends(get_database)], # This line protects the endpoint
 ) -> Message:
-    """
-    Receives a prompt
-    Requires user to be authenticated.
-    """
     print(f"Chat request from user: {current_user.username}") # You can now see who is chatting
     
     # get the current persona

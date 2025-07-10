@@ -3,7 +3,9 @@ import { FormEvent, useState } from 'react';
 import Modal from 'react-modal';
 import TraitSlider from './TraitSlider';
 import { sendSamplePost } from '@/app/lib/fetchers';
+import { Vortex } from 'react-loader-spinner';
 import { API_BASE_URL } from '@/app/lib/constants';
+import { toast, ToastContainer } from 'react-toastify';
 
 export interface PersonaConfig {
   name: string;
@@ -50,6 +52,8 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
   const [isAdding, setIsAdding] = useState(false);
   const [persona, setPersona] = useState<PersonaConfig>(initialPersonaData);
   const [samplePost, setSamplePost] = useState<string>("");
+  const [isGeneratingPersona, setIsGeneratingPersona] = useState(false);
+  const [isSettingPersona, setIsSettingPersona] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -71,9 +75,18 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
   const handleGeneratePersona = async () => {
     // In a real app, you would call your API to generate the persona based on the sample post
     // For now, we'll just log the sample post
+    setIsGeneratingPersona(true);
     console.log("Generating persona based on sample post:", samplePost);
     const url = `${API_BASE_URL}/personas/generate`;
     const response = await sendSamplePost(url, samplePost);
+    if (!response) {
+      console.error("Failed to generate persona");
+      setIsGeneratingPersona(false);
+      toast.error("Failed to generate persona. Please try again.");
+      return;
+    }
+    setIsGeneratingPersona(false);
+    toast.success("Persona generated successfully!");
     console.log("Generated Persona:", response);
     // set state here
     setPersona(response)
@@ -83,7 +96,10 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
     e.preventDefault();
     // In a real app, you would send this 'persona' object to your API
     console.log("Form Submitted:", persona);
+    setIsSettingPersona(true);
     onAddItem(persona)
+    setIsSettingPersona(false);
+    toast.success("Persona created successfully!");
     setIsAdding(false);
   };
 
@@ -99,27 +115,38 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
   }
 
   return (
+    <>
     <Modal
       isOpen={isAdding}
       onRequestClose={() => setIsAdding(false)}
       contentLabel="Add New Item"
       ariaHideApp={false}
-        style={{
-          content: {
-            zIndex: 1001
-          },
-          overlay: {
-            zIndex: 1000
-          },
-        }}
+      style={{
+        content: {
+          zIndex: 1001
+        },
+        overlay: {
+          zIndex: 1000
+        },
+      }}
     >
       <div className="flex flex-col align-items-center pb-4">
         <section>
-            <div className='mb-6'>  
-              <label htmlFor="style" className="block text-sm font-medium text-gray-700">Enter a sample post to automatically generate the persona </label>
-              <textarea id="style" name="style" value={samplePost} onChange={(e) => setSamplePost(e.target.value)} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
-              <button onClick={handleGeneratePersona} className='mt-8 bg-blue-600 p-4 rounded-full text-white hover:cursor-pointer'>Generate Persona</button>
-            </div>
+          <div className='mb-6'>
+            <label htmlFor="style" className="block text-sm font-medium text-gray-700">Enter a sample post to automatically generate the persona </label>
+            <textarea id="style" name="style" value={samplePost} onChange={(e) => setSamplePost(e.target.value)} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+            <button onClick={handleGeneratePersona} disabled={isGeneratingPersona} className='flex justify-center mt-8 bg-blue-600 p-4 rounded-full text-white hover:cursor-pointer'>{isGeneratingPersona
+              ? <Vortex
+                visible={true}
+                height={30}
+                width={40}
+                ariaLabel="vortex-loading"
+                wrapperStyle={{}}
+                wrapperClass="vortex-wrapper"
+                colors={['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', "#ffffff"]}
+              />
+              : "Generate Persona"}</button>
+          </div>
           <h2 className="text-xl font-semibold text-gray-800 border-b pb-3 mb-6">Core Identity</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -177,9 +204,17 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
             <TraitSlider label="Humor" name="humor" value={persona.humor} onChange={handleChange} />
           </div>
         </section>
-        <button onClick={handleSubmit} className='mt-8 bg-blue-600 p-4 rounded-full text-white hover:cursor-pointer'>Create Persona</button>
+        <button onClick={handleSubmit} disabled={isSettingPersona} className='mt-8 bg-blue-600 p-4 rounded-full text-white hover:cursor-pointer'>{isSettingPersona ? <Vortex
+          visible={true}
+          ariaLabel="vortex-loading"
+          wrapperStyle={{}}
+          wrapperClass="vortex-wrapper"
+          colors={['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', "#ffffff"]}
+        /> : "Create Persona"}</button>
       </div>
     </Modal>
+    <ToastContainer />
+    </>
   );
 };
 

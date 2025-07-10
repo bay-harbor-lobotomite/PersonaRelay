@@ -2,6 +2,9 @@ import { z } from 'zod';
 import Modal from 'react-modal';
 import React, { useState } from 'react';
 import { MessageSchema } from '@/app/generate/page';
+import { se } from 'date-fns/locale';
+import { toast, ToastContainer } from 'react-toastify';
+import { Vortex } from 'react-loader-spinner';
 export type Message = z.infer<typeof MessageSchema>;
 
 interface MessageCardProps {
@@ -12,6 +15,12 @@ interface MessageCardProps {
 
 const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
+  const handleNostrPost = async (msg: any) => {
+    setIsPosting(true);
+    await handlePost(msg.text);
+    setIsPosting(false);
+  }
   return (
     <div
       draggable="true"
@@ -26,16 +35,27 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
         {message.text}
       </p>
       <button
-        onClick={() => handlePost(message.text)}
+        onClick={handleNostrPost}
+        disabled={isPosting}
         className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors"
       >
-        Post to Nostr
+        {isPosting ?
+          <Vortex
+            visible={true}
+            height={30}
+            width={40}
+            ariaLabel="vortex-loading"
+            wrapperStyle={{}}
+            wrapperClass="vortex-wrapper"
+            colors={['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', "#ffffff"]}
+          /> :
+          "Post to Nostr"}
       </button>
       <Modal
         isOpen={isAdding}
         onRequestClose={() => setIsAdding(false)}
         contentLabel="Full Message"
-        ariaHideApp={true} 
+        ariaHideApp={true}
         style={{
           content: {
             top: '50%',
@@ -47,7 +67,7 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
             width: '80%',
             maxWidth: '600px',
             background: '#1f2937',
-            border: '1px solid #4b5563', 
+            border: '1px solid #4b5563',
             borderRadius: '8px',
             color: '#d1d5db',
             zIndex: 1001
@@ -73,6 +93,7 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
           Close
         </button>
       </Modal>
+      <ToastContainer />
     </div>
   );
 };
