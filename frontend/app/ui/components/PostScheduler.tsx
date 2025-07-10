@@ -13,8 +13,9 @@ import { Overlay } from 'react-overlays';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
+import '@/app/calendar-overrides.css'
 import MessageCard, { Message } from './MessageCard'; // Assuming Message type is now correct
-import { reverse } from 'dns';
+import { ToastContainer, toast } from 'react-toastify';
 
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
@@ -89,7 +90,9 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
     useEffect(() => {
         if (!lastJsonMessage) return;
         
-        const updatedMessage: Message = lastJsonMessage;
+        const updatedMessage: Message = lastJsonMessage
+        if(updatedMessage.text)
+        toast.success("Posted! : " + updatedMessage.text.substring(0, 30) + '...');
 
         if (updatedMessage.schedule_status === 'unscheduled') {
             setCalendarEvents(prev => prev.filter(ev => ev.resource._id !== updatedMessage._id));
@@ -177,7 +180,7 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
     }, [selectedEvent]);
 
     const eventPropGetter = useCallback(
-        (event: CalendarEvent) => ({
+        (event: CalendarEvent) => (event.resource && {
             className: 
                 event.resource.schedule_status === 'posted' ? 'bg-green-500 border-green-600 text-white' :
                 event.resource.schedule_status === 'failed' ? 'bg-yellow-500 border-yellow-600 text-white' :
@@ -192,10 +195,10 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
     return (
         <div className="flex flex-col h-full">
             <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-                <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                <h2 className="text-lg font-semibold mb-3 text-white">
                     Unscheduled Posts
                 </h2>
-                <div className="flex overflow-x-auto space-x-4 pb-4">
+                <div className="flex overflow-x-auto space-x-4 pb-4 custom-scrollbar">
                     {/* The list now maps over the 'unscheduled' state array */}
                     {unscheduled.map((message) => (
                         <MessageCard
@@ -235,7 +238,7 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
                                     <p className="text-xs mb-3 text-gray-600 dark:text-gray-300 italic">{selectedEvent.title}</p>
                                     <button
                                         onClick={handleDeleteEvent}
-                                        disabled={selectedEvent.resource.schedule_status === 'posted'} // Disable based on real status
+                                        disabled={selectedEvent.resource && selectedEvent.resource.schedule_status === 'posted'} // Disable based on real status
                                         className="w-full flex items-center justify-center px-3 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
                                     >
                                         <TrashIcon className="mr-2" size={16} /> Unschedule
@@ -244,6 +247,7 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
                             )}
                         </Overlay>
                     )}
+                    <ToastContainer />
                 </div>
             </div>
         </div>

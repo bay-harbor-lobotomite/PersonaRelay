@@ -38,17 +38,17 @@ const Page = () => {
     <div className="flex h-screen">
       <ToastContainer position="bottom-right" />
       <Sidebar setSelectedPersona={setSelectedPersona} />
-      <div className="flex flex-grow flex-col max-w-screen h-screen bg-gray-50 dark:bg-gray-950 font-[family-name:var(--font-geist-sans)] overflow-hidden">
+      <div className="flex flex-grow flex-col max-w-screen h-screen bg-gray-50 dark:bg-gray-950 font-[family-name:var(--font-geist-sans)] overflow-hidden" style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text-primary)" }}>
         <header className="p-4 border-b border-gray-200 dark:border-gray-800 text-center flex justify-between items-center flex-shrink-0">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200 w-full text-left ml-8">
+          <h1 className="text-xl font-bold text-white w-full text-left ml-8">
             Schedule posts for: {persona ? persona.name : "..."}
           </h1>
-          <button onClick={() => router.push('/generate')} className='px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors hover:cursor-pointer'>
+          <button onClick={() => router.push('/generate')} className='px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors hover:cursor-pointer' style={{ backgroundColor: "var(--color-accent-primary)" }}>
             Generate Posts
           </button>
         </header>
         <main className="flex-grow overflow-y-auto">
-          {messagesLoading && <p className="p-4 text-center">Loading messages...</p>}
+          {messagesLoading && <p className="p-4 text-center text-white">Loading messages...</p>}
           {messagesError && <p className="p-4 text-center text-red-500">Error loading messages.</p>}
           {/* Use the PostScheduler here */}
           {!messagesLoading && !messagesError && (

@@ -1,0 +1,132 @@
+/* styles/calendar-overrides.css */
+
+/* --- Overall Calendar Container --- */
+.rbc-calendar {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-medium);
+}
+
+/* --- Toolbar (Top navigation) --- */
+.rbc-toolbar {
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.rbc-toolbar .rbc-toolbar-label {
+  color: var(--color-text-primary);
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+.rbc-btn-group button {
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.rbc-btn-group button:hover,
+.rbc-btn-group button:focus {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  outline: none;
+  box-shadow: none;
+}
+
+.rbc-btn-group button.rbc-active {
+  background-color: var(--color-accent-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-secondary);
+  box-shadow: none;
+}
+
+/* --- Calendar Grid & Borders --- */
+.rbc-header {
+  color: var(--color-text-primary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+  padding: 8px 0;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  border: none; /* Remove internal borders handled by cells */
+}
+
+/* All borders between cells */
+.rbc-month-row,
+.rbc-day-bg,
+.rbc-header,
+.rbc-time-header-content,
+.rbc-time-header-gutter,
+.rbc-time-content,
+.rbc-time-content .rbc-time-gutter,
+.rbc-timeslot-group {
+  border-color: var(--color-border) !important;
+}
+
+/* Background of "other month" days */
+.rbc-off-range-bg {
+  background-color: var(--color-bg-primary);
+}
+
+/* Highlight for the current day */
+.rbc-today {
+  background-color: var(--color-accent-secondary);
+}
+
+/* --- Events --- */
+.rbc-event {
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-accent-primary);
+  border-radius: var(--border-radius-small);
+  padding: 4px 6px;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.rbc-event:hover {
+  opacity: 1;
+}
+
+/* Style for a selected event */
+.rbc-event.rbc-selected {
+  background-color: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+}
+
+/* For events in month view that continue to next row */
+.rbc-row-segment .rbc-event-content {
+  font-size: 0.8em;
+}
+
+/* --- Agenda View --- */
+.rbc-agenda-table {
+  border: 1px solid var(--color-border);
+}
+.rbc-agenda-table th, .rbc-agenda-table td {
+  border-bottom: 1px solid var(--color-border);
+}
+.rbc-agenda-table thead th {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* --- Popover for "Show More" --- */
+.rbc-overlay {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  z-index: 1001; /* Ensure it's on top of your app content */
+}
+
+.rbc-overlay-header {
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}

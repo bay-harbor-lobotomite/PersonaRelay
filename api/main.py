@@ -46,7 +46,7 @@ async def redis_listener(pubsub, db: Database):
             final_update_data = {}
             if status == "posted":
                 final_update_data = {
-                        "$set": {"schedule_status": "unscheduled"},
+                        "$set": {"schedule_status": "posted"},
                         "$unset": {"scheduled_time": "", "task_id": ""}
                 }
             elif status == "failed":

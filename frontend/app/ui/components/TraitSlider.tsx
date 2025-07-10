@@ -23,9 +23,9 @@ export default function TraitSlider({
 }: TraitSliderProps) {
   return (
     <div>
-      <label htmlFor={name} className="flex justify-between items-center text-sm font-medium text-gray-700">
+      <label htmlFor={name} className="flex justify-between items-center text-sm font-medium text-gray-700 text-white">
         <span>{label}</span>
-        <span className="font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
+        <span className="font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-accent-primary)' }}>
           {value.toFixed(2)}
         </span>
       </label>
@@ -38,7 +38,8 @@ export default function TraitSlider({
         step={step}
         value={value}
         onChange={onChange}
-        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+        className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-green-600"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
       />
     </div>
   );

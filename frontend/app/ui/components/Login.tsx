@@ -17,7 +17,7 @@ export default function Login() {
   useEffect(() => {
     // Check if the user is already logged in
     checkLogin(router, setCurrentUser);
-  }, []);             
+  }, []);
 
   const handleLogin = async () => {
     // The /token endpoint expects form data, not JSON
@@ -34,7 +34,7 @@ export default function Login() {
     });
 
     if (!response.ok) {
-        throw new Error("Failed to login");
+      throw new Error("Failed to login");
     }
 
     const data = await response.json();
@@ -45,52 +45,52 @@ export default function Login() {
 
   const handleRegister = async () => {
     const response = await fetch(`${API_BASE_URL}/register`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Registration failed");
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Registration failed");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-        setError("Username and password are required.");
-        return;
+      setError("Username and password are required.");
+      return;
     }
     setIsLoading(true);
     setError(null);
 
     try {
-        await handleLogin();
+      await handleLogin();
     } catch (loginError) {
-        console.log("Login failed, attempting to register...");
-        try {
-            await handleRegister();
-            console.log("Registration successful, logging in again...");
-            await handleLogin();
-        } catch (registerOrSecondLoginError: any) {
-            setError(registerOrSecondLoginError.message || "An unexpected error occurred. The username might be taken or invalid.");
-        }
+      console.log("Login failed, attempting to register...");
+      try {
+        await handleRegister();
+        console.log("Registration successful, logging in again...");
+        await handleLogin();
+      } catch (registerOrSecondLoginError: any) {
+        setError(registerOrSecondLoginError.message || "An unexpected error occurred. The username might be taken or invalid.");
+      }
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--color-bg-secondary)" }}>
+      <div className="w-full max-w-md p-8 space-y-8 rounded-xl shadow-lg border border-white" style={{ backgroundColor: "var(--color-bg-primary)" }}>
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold" style={{ color: "var(--color-text-primary)" }}>
             Welcome!
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600" style={{ color: "var(--color-text-secondary)" }}>
             Login to continue
           </p>
         </div>
@@ -106,7 +106,8 @@ export default function Login() {
                 type="text"
                 autoComplete="username"
                 required
-                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-3 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green sm:text-sm"
+                style={{ color: "var(--color-text-primary)" }}
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -122,7 +123,8 @@ export default function Login() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="relative block w-full mt-4 appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                className="relative block w-full mt-4 appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-3 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                style={{ color: "var(--color-text-primary)" }}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -140,7 +142,8 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md border border-transparent py-3 px-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+              className="group relative flex w-full justify-center rounded-md border border-transparent py-3 px-4 text-sm font-medium text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+              style={{ backgroundColor: "var(--color-accent-primary)" }}
             >
               {isLoading ? "Processing..." : "Continue"}
             </button>

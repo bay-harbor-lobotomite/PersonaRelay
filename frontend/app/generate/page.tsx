@@ -93,10 +93,12 @@ export default function Home() {
     <div className="flex">
       <ToastContainer position="bottom-right"/>
       <Sidebar setSelectedPersona={handleSelectedPersona} />
-      <div className="flex flex-grow flex-col max-w-screen h-screen bg-gray-50 dark:bg-gray-950 font-[family-name:var(--font-geist-sans)]">
+      <div className="flex flex-grow flex-col max-w-screen h-screen font-[family-name:var(--font-geist-sans)]"
+      style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text-primary)" }}
+      >
         <header className="p-4 border-b border-gray-200 dark:border-gray-800 text-center flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200 w-full text-left ml-8">Craft posts for : {persona ? persona.name : ""}</h1>
-          <button onClick={() => router.push('/dashboard')} className='px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors hover:cursor-pointer'>View all posts</button>
+          <h1 className="text-xl font-bold text-white dark:text-gray-200 w-full text-left ml-8">Craft posts for : {persona ? persona.name : ""}</h1>
+          <button onClick={() => router.push('/dashboard')} className='px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors hover:cursor-pointer' style={{backgroundColor: "var(--color-accent-primary)"}}>View all posts</button>
         </header>
         <div className="flex-grow p-4 sm:p-6 overflow-y-auto">
           <div className="space-y-6">

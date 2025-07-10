@@ -19,12 +19,13 @@ const Sidebar: React.FC<SidebarProps> = ({ setSelectedPersona }) => {
   };
 
   return (
-    <div className='bg-gray-200 h-screen min-w-2/12 p-4 overflow-y-auto w-2/12 justify-between flex flex-col'>
+    <div className='bg-gray-200 h-screen min-w-2/12 p-4 overflow-y-auto w-2/12 justify-between flex flex-col'
+    style={{ backgroundColor: "var(--color-bg-primary)", color: "var(--color-text-primary)" }}>
       <div className="flex flex-col align-items-center">
-      <h2>
+      <AddPersonalityForm onAddItem={handleAddItem} />
+      <h2 className='text-xl font-bold mt-4 text-center'>
         Saved Personas
       </h2>
-      <AddPersonalityForm onAddItem={handleAddItem} />
       <PersonalityList personalityList={Array.isArray(personas) ? personas : []} onSelectPersona={setSelectedPersona}/>
       </div>
       <LogoutButton />
