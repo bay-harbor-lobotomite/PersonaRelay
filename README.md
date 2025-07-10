@@ -52,11 +52,11 @@ You will need the following software installed on your machine:
 git clone https://github.com/bay-harbor-lobotomite/PersonaRelay.git
 cd PersonaRelay
 ```
-#### 2. Backend Setup (/backend directory)
+#### 2. Backend Setup (/api directory)
 The backend runs the FastAPI server, the Celery task scheduler, and Redis.
 1) **Navigate to the backend directory**
 ```bash
-cd backend
+cd api
 ```
 2) **Create and activate a Python virtual environment:**
 ```bash
@@ -70,18 +70,22 @@ pip install -r requirements.txt
 ```
 4) Create an environment file similar to the one in ```.env.example.```  
 5) **Start the services (3 separate terminals):**  
+    
     - **Terminal 1: Start Redis using Docker:**  
      ```bash
         docker run -d -p 6379:6379 redis
      ```
+    
     - **Terminal 2: Start the Celery worker:**
      ```bash
         celery -A celery_worker.celery_app worker --loglevel=info -P gevent
      ```    
+    
     - **Terminal 3: Start the FastAPI server:**
      ```bash
         uvicorn main:app --reload
-     ```    
+      ```
+    
 Your backend should now be running on http://localhost:8000.
 
 #### 3. Frontend Setup (/frontend directory)
