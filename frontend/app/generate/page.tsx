@@ -11,13 +11,15 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { checkLogin } from "@/app/lib/checkLogin";
 import {toast, ToastContainer } from "react-toastify";
-import { set } from "zod/v4";
 export const MessageSchema = z.object({
   _id: z.string(),
   text: z.string(),
   sender: z.literal('bot'),
   persona_name: z.string(),
   username: z.string(),
+  scheduled_time: z.string().optional(),
+  schedule_status: z.string(),
+  task_id: z.string().optional(),
 });
 
 export default function Home() {
@@ -47,7 +49,7 @@ export default function Home() {
   const handleSendMessage = async (text: string) => {
     setIsSending(true);
 
-    const userMessage: Message = { _id: String(Date.now()), text, sender: 'user', persona_name: selectedPersona, username: currentUser?.username || "Unknown" };
+    const userMessage: Message = { _id: String(Date.now()), text, sender: 'user', persona_name: selectedPersona, username: currentUser?.username || "Unknown", schedule_status: "unscheduled" };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
 
@@ -81,6 +83,7 @@ export default function Home() {
         sender: 'bot',
         username: currentUser?.username || "Unknown", 
         persona_name: selectedPersona || "Unknown Persona",
+        schedule_status: "failed",
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {

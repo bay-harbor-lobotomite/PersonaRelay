@@ -1,7 +1,7 @@
 'use client';
 import useSWR, { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
-import { MESSAGES_BASE_URL, PERSONAS_BASE_URL } from "./constants";
+import { MESSAGES_BASE_URL, PERSONAS_BASE_URL, SCHEDULING_BASE_URL } from "./constants";
 
 const fetcher = (...args: [RequestInfo, RequestInit?]) => fetch(...args).then(res => res.json());
 export const authedFetcher = (url: string) => {
@@ -104,3 +104,31 @@ export async function sendSamplePost(url: string, sample_post: string){
     const data = await response.json()
     return data
 }
+
+export const schedulePostOnBackend = async (messageId: string, startDate: Date) => {
+    try {
+        const response = await fetch(`${SCHEDULING_BASE_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
+            body: JSON.stringify({ message_id: messageId, start_date: startDate.toISOString() }),
+        });
+        if (!response.ok) throw new Error('Failed to schedule');
+        return await response.json();
+    } catch (error) {
+        console.error("Scheduling failed:", error);
+        return null;
+    }
+};
+
+export const unschedulePostOnBackend = async (taskId: string) => {
+    try {
+        const response = await fetch(`${SCHEDULING_BASE_URL}/${taskId}`, { 
+            method: 'DELETE',
+            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
+         });
+        if (!response.ok) throw new Error('Failed to unschedule');
+        return await response.json();
+    } catch (error) {
+        console.error("Unscheduling failed:", error);
+    }
+};

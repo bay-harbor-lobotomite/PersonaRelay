@@ -8,6 +8,9 @@ export interface Message {
   sender: 'user' | 'bot';
   username: string;
   persona_name: string;
+  scheduled_time?: string;
+  schedule_status: string;
+  task_id?: string;
 }
 const ChatMessage = ({ message }: { message: Message }) => {
   const isUser = message.sender === 'user';

@@ -1,11 +1,15 @@
-import time
-import uuid
+import json
+import asyncio
 from datetime import timedelta
 from typing import List, Literal, Annotated
 from bson import ObjectId
+import redis.asyncio as aioredis
 from bson.errors import InvalidId
 from pymongo import ReturnDocument
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, WebSocket, WebSocketDisconnect
+import pytz
+from datetime import datetime
+from celery.result import AsyncResult
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, BeforeValidator
@@ -21,12 +25,58 @@ from agents.persona_agent import get_agent_response as persona_agent_response
 import auth
 
 load_dotenv()
+from celery_config import celery_app
+from celery_worker import schedule_post_task
+from websocket_manager import manager as connection_manager 
+
+
+async def redis_listener(pubsub, db: Database):
+    """Listens for messages from Redis and broadcasts them via WebSocket."""
+    await pubsub.subscribe("task_updates")
+    while True:
+        try:
+            message = await pubsub.get_message(ignore_subscribe_messages=True)
+            if not (message and message["type"] == "message"):
+                continue
+            print(f"Received message from Redis: {message['data']}")
+            data = json.loads(message["data"].decode("utf-8"))
+            message_id = data["message_id"]
+            status = data["status"]
+            
+            final_update_data = {}
+            if status == "posted":
+                final_update_data = {
+                        "$set": {"schedule_status": "unscheduled"},
+                        "$unset": {"scheduled_time": "", "task_id": ""}
+                }
+            elif status == "failed":
+                final_update_data = {"$set": {"schedule_status": "failed"}}
+            if final_update_data:
+                final_doc = db.messages.find_one_and_update(
+                    {"_id": ObjectId(message_id)},
+                    final_update_data,
+                    return_document=ReturnDocument.AFTER
+                )
+                if final_doc:
+                    await connection_manager.broadcast(Message(**final_doc).model_dump_json())
+        except Exception as e:
+            print(f"Error in Redis listener: {e}")
+            await asyncio.sleep(1)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await startup_db_client(app)
+    db = app.mongodb
+    redis_client = aioredis.from_url("redis://localhost:6379", decode_responses=False)
+    pubsub = redis_client.pubsub()
+    listener_task = asyncio.create_task(redis_listener(pubsub, db))
+    print("Redis listener started.")
     yield
+    listener_task.cancel()
+    await pubsub.close()
+    await redis_client.close()
     await shutdown_db_client(app)
+    print("Redis listener stopped.")
 
 async def startup_db_client(app: FastAPI):
     app.mongodb_client = MongoClient(os.getenv("MONGO_URI"))
@@ -41,6 +91,10 @@ async def shutdown_db_client(app: FastAPI):
 # It converts the ObjectId to a string for JSON serialization
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
+class ScheduleRequest(BaseModel):
+    message_id: str
+    start_date: datetime # The frontend should send this in ISO format
+
 class User(BaseModel):
     username: str
 
@@ -52,6 +106,7 @@ class UserCreate(BaseModel):
     password: str
 
 Sender = Literal['user', 'bot']
+ScheduleStatus = Literal['unscheduled', 'scheduled', 'posted', 'failed']
 
 class MessageBase(BaseModel):
     text: str
@@ -64,7 +119,10 @@ class Message(MessageBase):
     Represents a chat message.
     """
     id: PyObjectId = Field(alias="_id")
-
+    schedule_status: ScheduleStatus = Field(default='unscheduled')
+    scheduled_time: datetime | None = None
+    task_id: str | None = None
+    
     class Config:
         from_attributes = True
         populate_by_name = True
@@ -394,7 +452,7 @@ async def list_messages(
     current_user: Annotated[User, Depends(get_current_user_dependency)],
     db: Annotated[Database, Depends(get_database)],
 ):
-    messages = list(db.messages.find({"username": current_user.username, "persona_name": persona_name}))
+    messages = list(db.messages.find({"username": current_user.username, "persona_name": persona_name, "sender": "bot"}))
     return messages
     
 @app.post("/api/personas/generate", response_model=PersonaCreate)
@@ -426,3 +484,77 @@ async def post_to_nostr(
     print(response)
     
     return {"status": "success", "message": "Posted to Nostr successfully!"}
+
+
+@app.post("/api/schedule")
+async def schedule_post(req: ScheduleRequest,
+                        current_user: Annotated[User, Depends(get_current_user_dependency)],
+                        db: Annotated[Database, Depends(get_database)]):
+    # Fetch message details from your database
+    message_data = db.messages.find_one({"_id": ObjectId(req.message_id), "username": current_user.username})
+    if not message_data:
+        raise HTTPException(status_code=404, detail="Message not found")
+    target_time_utc = req.start_date.replace(hour=9, minute=0, second=0, microsecond=0).astimezone(pytz.UTC)
+    now_utc = datetime.now(pytz.UTC)
+    task_id = f"post-task-{req.message_id}-{int(datetime.now().timestamp())}"
+    if target_time_utc < now_utc:
+        print(f"Executing immediately for message_id: {req.message_id}")
+        task = schedule_post_task.apply_async(
+            args=[req.message_id, message_data['text']],
+            task_id=task_id,
+        )
+    else:
+        print(f"Scheduling for future for message_id: {req.message_id} at {target_time_utc}")
+        task = schedule_post_task.apply_async(
+            args=[req.message_id, message_data['text']],
+            task_id=task_id,
+            eta=target_time_utc
+        )
+    updated_message = db.messages.find_one_and_update(
+        {"_id": ObjectId(req.message_id)},
+        {"$set": {
+            "schedule_status": "scheduled",
+            "scheduled_time": target_time_utc,
+            "task_id": task_id
+        }},
+        return_document=ReturnDocument.AFTER
+    )
+
+    if not updated_message:
+        celery_app.control.revoke(task_id, terminate=True)
+        raise HTTPException(status_code=500, detail="Failed to update message state.")
+    
+    return Message(**updated_message)
+
+@app.delete("/api/schedule/{task_id}")
+async def unschedule_post(task_id: str,current_user: Annotated[User, Depends(get_current_user_dependency)], db: Annotated[Database, Depends(get_database)]):
+    message_to_unschedule = db.messages.find_one({
+        "task_id": task_id, 
+        "username": current_user.username
+    })
+
+    if not message_to_unschedule:
+        raise HTTPException(status_code=404, detail="Scheduled task not found or you don't have permission.")
+    
+    celery_app.control.revoke(task_id, terminate=True, signal='SIGKILL')
+    
+    updated_message = db.messages.find_one_and_update(
+        {"_id": message_to_unschedule["_id"]},
+        {
+            "$set": {"schedule_status": "unscheduled"},
+            "$unset": {"scheduled_time": "", "task_id": ""}
+        },
+        return_document=ReturnDocument.AFTER
+    )
+
+    return Message(**updated_message)
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await connection_manager.connect(websocket)
+    try:
+        while True:
+            # Keep the connection alive
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        connection_manager.disconnect(websocket)
