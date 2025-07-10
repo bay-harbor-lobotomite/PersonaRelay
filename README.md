@@ -78,7 +78,7 @@ pip install -r requirements.txt
     
     - **Terminal 2: Start the Celery worker:**
      ```bash
-        celery -A celery_worker.celery_app worker --loglevel=info -P gevent
+        celery -A celery_config.celery_app worker --loglevel=info -P gevent
      ```    
     
     - **Terminal 3: Start the FastAPI server:**
