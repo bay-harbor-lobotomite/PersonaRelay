@@ -151,7 +151,7 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
             <section>
               <div className='mb-6'>
                 <label htmlFor="style" className="block text-sm font-medium text-gray-700" style={{ color: "var(--color-text-primary)" }}>Enter a sample post to automatically generate the persona </label>
-                <textarea id="style" name="style" value={samplePost} onChange={(e) => setSamplePost(e.target.value)} rows={3} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                <textarea id="style" name="style" value={samplePost} onChange={(e) => setSamplePost(e.target.value)} rows={3} className="mt-1 p-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 <button onClick={handleGeneratePersona} disabled={isGeneratingPersona} className='flex justify-center mt-4 ml-4 p-4 rounded-full text-white hover:cursor-pointer interactive-grow disabled:cursor-not-allowed' style={{ backgroundColor: "var(--color-accent-primary)" }}>{isGeneratingPersona
                   ? <Vortex
                     visible={true}
@@ -168,19 +168,19 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-100">Name</label>
-                  <input type="text" id="name" name="name" value={persona.name} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <input type="text" id="name" name="name" value={persona.name} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
                 <div>
                   <label htmlFor="age" className="block text-sm font-medium text-gray-100">Age</label>
-                  <input type="number" id="age" name="age" value={persona.age} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <input type="number" id="age" name="age" value={persona.age} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
                 <div>
                   <label htmlFor="role" className="block text-sm font-medium text-gray-100">Role</label>
-                  <input type="text" id="role" name="role" value={persona.role} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <input type="text" id="role" name="role" value={persona.role} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-gray-100">Description</label>
-                  <textarea id="description" name="description" value={persona.description} onChange={handleChange} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <textarea id="description" name="description" value={persona.description} onChange={handleChange} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
               </div>
             </section>
@@ -191,19 +191,19 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="conversation_style" className="block text-sm font-medium text-gray-100">Conversation Style</label>
-                  <input type="text" id="conversation_style" name="conversation_style" value={persona.conversation_style} onChange={handleChange} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <input type="text" id="conversation_style" name="conversation_style" value={persona.conversation_style} onChange={handleChange} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
                 <div>
                   <label htmlFor="quirks" className="block text-sm font-medium text-gray-100">Quirks</label>
-                  <input type="text" id="quirks" name="quirks" value={persona.quirks} onChange={handleChange} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <input type="text" id="quirks" name="quirks" value={persona.quirks} onChange={handleChange} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
                 <div className="md:col-span-2">
                   <label htmlFor="domain_knowledge" className="block text-sm font-medium text-gray-100">Domain Knowledge (comma-separated)</label>
-                  <input type="text" id="domain_knowledge" name="domain_knowledge" value={persona.domain_knowledge.join(', ')} onChange={handleChange} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <input type="text" id="domain_knowledge" name="domain_knowledge" value={persona.domain_knowledge.join(', ')} onChange={handleChange} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
                 <div className="md:col-span-2">
                   <label htmlFor="bio" className="block text-sm font-medium text-gray-100">Bio & Lore</label>
-                  <textarea id="bio" name="bio" value={persona.bio} onChange={handleChange} rows={4} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" style={{ backgroundColor: "var(--color-bg-primary)" }} />
+                  <textarea id="bio" name="bio" value={persona.bio} onChange={handleChange} rows={4} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-white" style={{ backgroundColor: "var(--color-bg-primary)" }} />
                 </div>
               </div>
             </section>

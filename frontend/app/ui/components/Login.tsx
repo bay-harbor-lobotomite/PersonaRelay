@@ -88,7 +88,7 @@ export default function Login() {
       <div className="w-full max-w-md p-8 space-y-8 rounded-xl shadow-lg border border-white" style={{ backgroundColor: "var(--color-bg-primary)" }}>
         <div className="text-center">
           <h2 className="text-3xl font-bold" style={{ color: "var(--color-text-primary)" }}>
-            Welcome!
+            Welcome to PersonaRelay!
           </h2>
           <p className="mt-2 text-sm text-gray-600" style={{ color: "var(--color-text-secondary)" }}>
             Login to continue
