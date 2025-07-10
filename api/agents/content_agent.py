@@ -15,7 +15,6 @@ load_dotenv()
 IO_API_KEY = os.getenv("IO_API_KEY")
 BASE_ENDPOINT = os.getenv("BASE_ENDPOINT")
 
-# the content agent will create a catchy social media post based on the prompt of the user 
 CONTENT_AGENT_INSTRUCTIONS = (
     "You are an assistant specialized in creating catchy social media posts. "
     "Your task is to generate a post that is engaging and relevant to the topic provided. "

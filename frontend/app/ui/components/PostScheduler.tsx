@@ -10,6 +10,7 @@ import { format, parse, startOfWeek, getDay, isSameDay } from 'date-fns';
 import { TrashIcon, XIcon } from 'lucide-react';
 import { enUS } from 'date-fns/locale/en-US';
 import { Overlay } from 'react-overlays';
+import {motion} from 'framer-motion';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
@@ -36,10 +37,19 @@ interface PostSchedulerProps {
     handlePost: (message: string) => void;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
 const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
     const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
     const [unscheduled, setUnscheduled] = useState<Message[]>([]);
-    // ----------------------------
 
     const [draggedEventFromOutside, setDraggedEventFromOutside] = useState<Message | null>(null);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -198,7 +208,12 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
                 <h2 className="text-lg font-semibold mb-3 text-white">
                     Unscheduled Posts
                 </h2>
-                <div className="flex overflow-x-auto space-x-4 pb-4 custom-scrollbar">
+                <motion.div 
+                className="flex overflow-x-auto space-x-4 pb-4 custom-scrollbar"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                >
                     {/* The list now maps over the 'unscheduled' state array */}
                     {unscheduled.map((message) => (
                         <MessageCard
@@ -208,7 +223,7 @@ const PostScheduler = ({ messages, handlePost }: PostSchedulerProps) => {
                             onDragStart={handleDragStartFromOutside}
                         />
                     ))}
-                </div>
+                </motion.div>
             </div>
 
             <div className="flex-grow p-4 min-h-0 relative" ref={calendarContainerRef}>

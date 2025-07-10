@@ -81,6 +81,22 @@
     color: var(--color-text-primary);
 }
 
+/* --- Interactive Animation Utilities --- */
+.interactive-grow {
+  /* Smooths the transition over 0.2 seconds */
+  transition: transform 0.2s ease-in-out;
+}
+
+.interactive-grow:hover {
+  /* Scales the element to 105% of its original size */
+  transform: scale(1.05);
+}
+
+.interactive-grow:active {
+  /* A nice touch: scale down slightly when clicked */
+  transform: scale(0.98);
+}
+
 /* Custom Scrollbar Styling for Webkit browsers (Chrome, Safari, Edge) */
 
 /* Apply this class to the scrollable container */

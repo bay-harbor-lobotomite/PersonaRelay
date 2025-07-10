@@ -5,6 +5,7 @@ import { MessageSchema } from '@/app/generate/page';
 import { se } from 'date-fns/locale';
 import { toast, ToastContainer } from 'react-toastify';
 import { Vortex } from 'react-loader-spinner';
+import { motion, AnimatePresence } from 'framer-motion';
 export type Message = z.infer<typeof MessageSchema>;
 
 interface MessageCardProps {
@@ -12,6 +13,14 @@ interface MessageCardProps {
   handlePost: (message: string) => void;
   onDragStart: (message: Message) => void;
 }
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1
+  }
+};
 
 const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => {
   const [isAdding, setIsAdding] = useState(false);
@@ -22,10 +31,13 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
     setIsPosting(false);
   }
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      variants={itemVariants}
       draggable="true"
       onDragStart={() => onDragStart(message)}
-      className="flex flex-col justify-between p-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow flex-shrink-0 w-64 cursor-grab" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}
+      className="flex flex-col justify-between p-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow flex-shrink-0 w-64 cursor-grab interactive-grow z-50" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}
     >
       <p
         onClick={() => setIsAdding(true)}
@@ -37,7 +49,7 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
       <button
         onClick={handleNostrPost}
         disabled={isPosting}
-        className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors" style={{ backgroundColor: 'var(--color-accent-primary)' }}
+        className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 cursor-pointer transition-colors disabled:cursor-not-allowed" style={{ backgroundColor: 'var(--color-accent-primary)' }}
       >
         {isPosting ?
           <Vortex
@@ -73,7 +85,8 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            zIndex: 1001
+            zIndex: 1001,
+            overflow: "visible"
           },
           overlay: {
             backgroundColor: 'var(--color-surface-hover)',
@@ -81,24 +94,35 @@ const MessageCard = ({ message, handlePost, onDragStart }: MessageCardProps) => 
           },
         }}
       >
-        <h3 className="text-2xl font-semibold text-gray-100 mb-4 text-center">
-          Full Message
-        </h3>
-        <div className="max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-          <p className="text-white whitespace-pre-wrap break-words">
-            {message.text}
-          </p>
-        </div>
-        <button
-          onClick={() => setIsAdding(false)}
-          className="mt-4 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700"
-          style={{ backgroundColor: 'var(--color-accent-secondary)' }}
-        >
-          Close
-        </button>
+        <AnimatePresence>
+          {isAdding && ( 
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: -20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }} 
+              transition={{ type: 'spring', damping: 15, stiffness: 200 }}
+              className="h-full overflow-y-auto custom-scrollbar rounded-lg shadow-xl" 
+            >
+              <h3 className="text-2xl font-semibold text-gray-100 mb-4 text-center">
+                Full Message
+              </h3>
+              <div className="max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                <p className="text-white whitespace-pre-wrap break-words">
+                  {message.text}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsAdding(false)}
+                className="mt-4 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700"
+                style={{ backgroundColor: 'var(--color-accent-secondary)' }}
+              >
+                Close
+              </button>
+            </motion.div>)}
+        </AnimatePresence>
       </Modal>
       <ToastContainer />
-    </div>
+    </motion.div>
   );
 };
 

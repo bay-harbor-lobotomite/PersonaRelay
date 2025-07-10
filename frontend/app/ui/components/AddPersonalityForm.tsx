@@ -6,6 +6,7 @@ import { sendSamplePost } from '@/app/lib/fetchers';
 import { Vortex } from 'react-loader-spinner';
 import { API_BASE_URL } from '@/app/lib/constants';
 import { toast, ToastContainer } from 'react-toastify';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface PersonaConfig {
   name: string;
@@ -107,7 +108,7 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
     return (
       <button
         onClick={() => setIsAdding(true)}
-        className="w-full flex items-center justify-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+        className="w-full flex items-center justify-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer interactive-grow"
         style={{ backgroundColor: "var(--color-accent-primary)", color: "var(--color-text-primary)" }}
       >
         Create a new persona
@@ -126,7 +127,9 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
           content: {
             zIndex: 1001,
             maxHeight: '90vh',
-            backgroundColor: 'var(--color-surface-hover)'
+            backgroundColor: 'var(--color-surface-hover)',
+            border: "none",
+            overflow: "visible"
           },
           overlay: {
             zIndex: 1000,
@@ -134,14 +137,22 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
           },
         }}
       >
-        <div className="h-full overflow-y-auto custom-scrollbar">
-
+  <AnimatePresence>
+    {isAdding && ( // <-- Only render when isOpen is true
+      <motion.div
+        // Animate from the center, scaling up
+        initial={{ scale: 0.9, opacity: 0, y: -20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }} // Animate out
+        transition={{ type: 'spring', damping: 15, stiffness: 200 }}
+        className="h-full overflow-y-auto custom-scrollbar rounded-lg shadow-xl" // Apply styles here
+      >
           <div className="flex flex-col align-items-center pb-4">
             <section>
               <div className='mb-6'>
                 <label htmlFor="style" className="block text-sm font-medium text-gray-700" style={{ color: "var(--color-text-primary)" }}>Enter a sample post to automatically generate the persona </label>
                 <textarea id="style" name="style" value={samplePost} onChange={(e) => setSamplePost(e.target.value)} rows={3} className="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border" style={{ backgroundColor: "var(--color-bg-primary)" }} />
-                <button onClick={handleGeneratePersona} disabled={isGeneratingPersona} className='flex justify-center mt-8  p-4 rounded-full text-white hover:cursor-pointer' style={{ backgroundColor: "var(--color-accent-primary)" }}>{isGeneratingPersona
+                <button onClick={handleGeneratePersona} disabled={isGeneratingPersona} className='flex justify-center mt-4 ml-4 p-4 rounded-full text-white hover:cursor-pointer interactive-grow disabled:cursor-not-allowed' style={{ backgroundColor: "var(--color-accent-primary)" }}>{isGeneratingPersona
                   ? <Vortex
                     visible={true}
                     height={30}
@@ -210,7 +221,7 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
                 <TraitSlider label="Humor" name="humor" value={persona.humor} onChange={handleChange} />
               </div>
             </section>
-            <button onClick={handleSubmit} disabled={isSettingPersona} className='mt-8 bg-blue-600 p-4 rounded-full text-white hover:cursor-pointer'
+            <button onClick={handleSubmit} disabled={isSettingPersona} className='mt-8 bg-blue-600 w-4/12 p-4 rounded-full text-white hover:cursor-pointer interactive-grow disabled:cursor-not-allowed self-center'
               style={{ backgroundColor: "var(--color-accent-primary)" }}>
               {isSettingPersona ? <Vortex
                 visible={true}
@@ -220,7 +231,8 @@ const AddItemForm = ({ onAddItem }: { onAddItem: (item: PersonaConfig) => void }
                 colors={['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', "#ffffff"]}
               /> : "Create Persona"}</button>
           </div>
-        </div>
+        </motion.div>)}
+        </AnimatePresence>
       </Modal>
       <ToastContainer />
     </>

@@ -43,7 +43,7 @@ const Page = () => {
           <h1 className="text-xl font-bold text-white w-full text-left ml-8">
             Schedule posts for: {persona ? persona.name : "..."}
           </h1>
-          <button onClick={() => router.push('/generate')} className='px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors hover:cursor-pointer' style={{ backgroundColor: "var(--color-accent-primary)" }}>
+          <button onClick={() => router.push('/generate')} className='px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-950 transition-colors hover:cursor-pointer interactive-grow' style={{ backgroundColor: "var(--color-accent-primary)" }}>
             Generate Posts
           </button>
         </header>
